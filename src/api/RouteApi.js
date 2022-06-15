@@ -11,7 +11,7 @@ export async function fetchGeoJson(coords) {
       "Content-Type": "application/json; charset=utf-8",
       Accept:
         "application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8",
-      Authorization: "5b3ce3597851110001cf624829825f6fed014a128936c1d5822f42a9",
+      Authorization: "",
     },
   });
 }
