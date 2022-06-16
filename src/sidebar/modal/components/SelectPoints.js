@@ -1,6 +1,7 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { Select, Divider, Input, Space, notification } from "antd";
+import { debounce } from "../../utils";
 import { SidebarContext } from "../../Sidebar";
 const { Option } = Select;
 
@@ -10,14 +11,16 @@ const SelectPoints = ({ indexSelect }) => {
   );
   const error = useSelector((state) => state.rootReducer.addressReducer.error);
   const { points, setPoints, fetchAddress } = useContext(SidebarContext);
-  const [name, setName] = useState("");
+  const [textValue, setText] = useState("");
 
-  const onNameChange = (event) => {
-    setName(event.target.value);
-    fetchAddress(event);
+  const debounceFetchAddress = useCallback(debounce(fetchAddress, 500), []);
+  const onChangeName = (event) => {
+    setText(event.target.value);
+    debounceFetchAddress(event);
   };
 
   const addDeliveryPoints = (data, index) => {
+    setText("");
     setPoints((prev) => {
       const clone = [...prev];
       clone[index] = JSON.parse(data);
@@ -67,8 +70,8 @@ const SelectPoints = ({ indexSelect }) => {
           >
             <Input
               placeholder="Введите адрес"
-              value={name}
-              onChange={onNameChange}
+              value={textValue}
+              onChange={onChangeName}
               style={{
                 display: "block",
                 width: "100%",

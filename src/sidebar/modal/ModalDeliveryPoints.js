@@ -14,6 +14,7 @@ const ModalDeliveryPoints = ({ visible, setVisible }) => {
     orderName,
     setOrderName,
     newOrder,
+    resetAddressInputs,
   } = useContext(SidebarContext);
 
   const handleOk = () => {
@@ -23,6 +24,7 @@ const ModalDeliveryPoints = ({ visible, setVisible }) => {
       setError(!error);
       setVisible(!visible);
       setOrderName("");
+      resetAddressInputs();
       newOrder();
       setPoints((prev) => {
         return [...initialStatePoints];

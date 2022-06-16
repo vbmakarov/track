@@ -4,7 +4,7 @@ import ModalDeliveryPoints from "./modal/ModalDeliveryPoints";
 import { useDispatch, useSelector } from "react-redux";
 import { notification } from "antd";
 import { getArrayCoords } from "./utils/";
-import { requestAddress } from "../store/actions/actionsOsm";
+import { requestAddress, resetAddresses } from "../store/actions/actionsOsm";
 import { Orders } from "./Orders";
 import {
   addOrder,
@@ -21,7 +21,6 @@ export default function Sidebar() {
   const [orderName, setOrderName] = useState("");
   const [points, setPoints] = useState(initialStatePoints);
   const [edit, setEdit] = useState(false);
-  const [width, setWidth] = useState(270);
   const [isResizeble, setResible] = useState(false);
   const activeOrder = useSelector(
     (state) => state.rootReducer.orderReducer.active
@@ -29,40 +28,6 @@ export default function Sidebar() {
   const orders = useSelector((state) => state.rootReducer.orderReducer.orders);
   const error = useSelector((state) => state.rootReducer.orderReducer.error);
   const dispatch = useDispatch();
-  const resizer = useRef(null);
-
-  const handleMouseDown = useCallback((e) => {
-    setResible(true);
-  }, []);
-
-  const handleMouseUp = useCallback((e) => {
-    setResible(false);
-  }, []);
-
-  const handleMouseMove = useCallback(
-    (e) => {
-      if (!isResizeble) {
-        return;
-      }
-      setWidth((prev) => {
-        return e.clientX * 1.1;
-      });
-    },
-    [isResizeble]
-  );
-
-  useEffect(() => {
-    const draggable = resizer.current;
-    draggable.addEventListener("mousedown", handleMouseDown);
-    window.addEventListener("mouseup", handleMouseUp);
-    window.addEventListener("mousemove", handleMouseMove);
-
-    return () => {
-      draggable.removeEventListener("mousedown", handleMouseDown);
-      window.removeEventListener("mouseup", handleMouseUp);
-      window.removeEventListener("mousemove", handleMouseMove);
-    };
-  });
 
   const fetchAddress = (e) => {
     if (e.target.value) {
@@ -89,6 +54,10 @@ export default function Sidebar() {
         return [...orders[orderId].points];
       });
     }
+  };
+
+  const resetAddressInputs = () => {
+    dispatch(resetAddresses());
   };
 
   const setActiveOrder = (orderId) => {
@@ -130,16 +99,15 @@ export default function Sidebar() {
         setVisible,
         visible,
         orders,
+        resetAddressInputs,
       }}
     >
       <div
         className="sidebar"
         style={{
-          flex: "1 " + "1 " + width + "px",
           cursor: isResizeble ? "col-resize" : "pointer",
         }}
       >
-        <div ref={resizer} className="sidebar__resizer"></div>
         <div className="sidebar__container">
           <ModalDeliveryPoints visible={visible} setVisible={setVisible} />
           <Orders />

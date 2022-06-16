@@ -23,3 +23,14 @@ export function getArrayCoords(points) {
   });
   return arr;
 }
+
+export const debounce = (func, delay) => {
+  let timeout;
+  return function () {
+    const bindFn = () => {
+      func.apply(this, arguments);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(bindFn, delay);
+  };
+};
