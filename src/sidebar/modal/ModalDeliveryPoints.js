@@ -5,42 +5,43 @@ import { SidebarContext } from "../Sidebar";
 import "./style.scss";
 
 const ModalDeliveryPoints = ({ visible, setVisible }) => {
-  const [error, setError] = useState(true);
-
   const {
     points,
     setPoints,
     initialStatePoints,
     orderName,
-    setOrderName,
     newOrder,
     resetAddressInputs,
+    pointError,
+    setPointError,
+    isEmptyFields,
+    setIsEmptyFields,
+    setName,
+    checkFields,
   } = useContext(SidebarContext);
 
   const handleOk = () => {
-    if (!orderName || !checkPoints()) {
-      setError(!error);
-    } else {
-      setError(!error);
+    const isEmpty = checkFields();
+    if (!isEmpty) {
       setVisible(!visible);
-      setOrderName("");
+      setName("");
       resetAddressInputs();
       newOrder();
       setPoints((prev) => {
         return [...initialStatePoints];
       });
+      setIsEmptyFields(false);
+    } else {
+      setIsEmptyFields(true);
     }
-  };
-
-  const checkPoints = () => {
-    const res = points.filter((point, index) => !point);
-    return !res.length;
   };
 
   const handleCancel = () => {
     setPoints(initialStatePoints);
+    setPointError(false);
     setVisible(!visible);
-    setOrderName("");
+    setName("");
+    setIsEmptyFields(false);
   };
 
   return (
@@ -52,21 +53,32 @@ const ModalDeliveryPoints = ({ visible, setVisible }) => {
       className="modal"
     >
       <div style={{ display: "flex", marginBottom: 15 }}>
-        <div style={{ flex: "1 1 30%" }}>Идентификатор*</div>
+        <div style={{ flex: "1 1 30%" }}>Имя заявки*</div>
         <Input
           style={{ flex: "1 1 70%" }}
           value={orderName}
-          onChange={(e) => setOrderName(e.target.value)}
+          onChange={(e) => setName(e.target.value)}
         />
       </div>
       <h3>Список адресов:</h3>
       <DeliveryPoints />
-      {!error ? (
+      {isEmptyFields ? (
         <Alert
           message="Пожалуйста, заполните все поля"
-          type="warning"
+          type="error"
           showIcon
-          closable
+          style={{
+            marginTop: 10,
+          }}
+        />
+      ) : (
+        ""
+      )}
+      {pointError ? (
+        <Alert
+          message="Такой адрес уже существует"
+          type="error"
+          showIcon
           style={{
             marginTop: 10,
           }}

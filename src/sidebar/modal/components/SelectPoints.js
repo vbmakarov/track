@@ -10,7 +10,14 @@ const SelectPoints = ({ indexSelect }) => {
     (state) => state.rootReducer.addressReducer.addresses
   );
   const error = useSelector((state) => state.rootReducer.addressReducer.error);
-  const { points, setPoints, fetchAddress } = useContext(SidebarContext);
+  const {
+    points,
+    setPoints,
+    fetchAddress,
+    checkFields,
+    setPointError,
+    setIsEmptyFields,
+  } = useContext(SidebarContext);
   const [textValue, setText] = useState("");
 
   const debounceFetchAddress = useCallback(debounce(fetchAddress, 500), []);
@@ -20,10 +27,22 @@ const SelectPoints = ({ indexSelect }) => {
   };
 
   const addDeliveryPoints = (data, index) => {
+    setIsEmptyFields(false);
     setText("");
     setPoints((prev) => {
+      const newData = JSON.parse(data);
+      const filter = prev.filter((point, index) => {
+        return point.place_id == newData.place_id;
+      });
+      if (filter.length) {
+        setPointError(true);
+        const clone = [...prev];
+        clone[index] = "";
+        return [...clone];
+      }
+      setPointError(false);
       const clone = [...prev];
-      clone[index] = JSON.parse(data);
+      clone[index] = newData;
       return [...clone];
     });
   };
@@ -36,63 +55,65 @@ const SelectPoints = ({ indexSelect }) => {
   }
 
   return (
-    <Select
-      style={{
-        width: "100%",
-        marginBottom: 15,
-        overflowX: "auto",
-        color: indexSelect === 0 ? "#000" : "",
-      }}
-      value={points[indexSelect] ? points[indexSelect].display_name : null}
-      onChange={(data) => addDeliveryPoints(data, indexSelect)}
-      status={indexSelect === 0 ? "error" : ""}
-      placeholder={
-        indexSelect == 0
-          ? "Выберете точку отправления"
-          : "Выберете точку доставки"
-      }
-      dropdownRender={(menu) => (
-        <>
-          {menu}
-          <Divider
-            style={{
-              margin: "8px 0",
-              overflowX: "auto",
-            }}
-          />
-          <Space
-            align="center"
-            style={{
-              display: "block",
-              padding: "0 8px 4px",
-              overflowX: "auto",
-            }}
-          >
-            <Input
-              placeholder="Введите адрес"
-              value={textValue}
-              onChange={onChangeName}
+    <>
+      <Select
+        style={{
+          width: "100%",
+          marginBottom: 15,
+          overflowX: "auto",
+          color: indexSelect === 0 ? "#000" : "",
+        }}
+        value={points[indexSelect] ? points[indexSelect].display_name : null}
+        onChange={(data) => addDeliveryPoints(data, indexSelect)}
+        status={indexSelect === 0 ? "error" : ""}
+        placeholder={
+          indexSelect == 0
+            ? "Выберете точку отправления"
+            : "Выберете точку доставки"
+        }
+        dropdownRender={(menu) => (
+          <>
+            {menu}
+            <Divider
               style={{
-                display: "block",
-                width: "100%",
+                margin: "8px 0",
+                overflowX: "auto",
               }}
             />
-          </Space>
-        </>
-      )}
-    >
-      {addresses.map((item, index) => (
-        <Option
-          key={item.place_id + index}
-          style={{
-            overflowX: "auto",
-          }}
-          value={JSON.stringify(item)}
-        >
-          {item.display_name}
-        </Option>
-      ))}
-    </Select>
+            <Space
+              align="center"
+              style={{
+                display: "block",
+                padding: "0 8px 4px",
+                overflowX: "auto",
+              }}
+            >
+              <Input
+                placeholder="Введите адрес"
+                value={textValue}
+                onChange={onChangeName}
+                style={{
+                  display: "block",
+                  width: "100%",
+                }}
+              />
+            </Space>
+          </>
+        )}
+      >
+        {addresses.map((item, index) => (
+          <Option
+            key={item.place_id + index}
+            style={{
+              overflowX: "auto",
+            }}
+            value={JSON.stringify(item)}
+          >
+            {item.display_name}
+          </Option>
+        ))}
+      </Select>
+    </>
   );
 };
 

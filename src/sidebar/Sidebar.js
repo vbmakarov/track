@@ -20,14 +20,29 @@ export default function Sidebar() {
   const [visible, setVisible] = useState(false);
   const [orderName, setOrderName] = useState("");
   const [points, setPoints] = useState(initialStatePoints);
+  const [pointError, setPointError] = useState(false);
+  const [isEmptyFields, setIsEmptyFields] = useState(false);
   const [edit, setEdit] = useState(false);
-  const [isResizeble, setResible] = useState(false);
   const activeOrder = useSelector(
     (state) => state.rootReducer.orderReducer.active
   );
   const orders = useSelector((state) => state.rootReducer.orderReducer.orders);
-  const error = useSelector((state) => state.rootReducer.orderReducer.error);
+  const newOrderError = useSelector(
+    (state) => state.rootReducer.orderReducer.error
+  );
   const dispatch = useDispatch();
+
+  const checkFields = () => {
+    let isEmpty = false;
+    const res = points.filter((point, index) => !point);
+    if (res.length) {
+      isEmpty = true;
+    }
+    if (!orderName) {
+      isEmpty = true;
+    }
+    return isEmpty;
+  };
 
   const fetchAddress = (e) => {
     if (e.target.value) {
@@ -64,6 +79,11 @@ export default function Sidebar() {
     dispatch(changeOrder(orderId));
   };
 
+  const setName = (value) => {
+    setOrderName(value);
+    setIsEmptyFields(false);
+  };
+
   const remove = (item) => {
     const result = window.confirm(
       "Вы точно хотите удалить заявку? Данные будут удалены безвозвратно!"
@@ -73,8 +93,8 @@ export default function Sidebar() {
     }
   };
 
-  if (error) {
-    notification["warning"]({
+  if (newOrderError) {
+    notification["error"]({
       message: "Не удалось добавить заявку",
       description: "Попробуйте попытаться еще раз.",
     });
@@ -100,14 +120,15 @@ export default function Sidebar() {
         visible,
         orders,
         resetAddressInputs,
+        pointError,
+        setPointError,
+        isEmptyFields,
+        setIsEmptyFields,
+        checkFields,
+        setName,
       }}
     >
-      <div
-        className="sidebar"
-        style={{
-          cursor: isResizeble ? "col-resize" : "pointer",
-        }}
-      >
+      <div className="sidebar">
         <div className="sidebar__container">
           <ModalDeliveryPoints visible={visible} setVisible={setVisible} />
           <Orders />
